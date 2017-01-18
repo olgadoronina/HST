@@ -14,25 +14,31 @@
 main(int argc, char **argv) 
 {
 	long int sum, partial_sum;
+	
 	MPI_Status status;
-	int my_id, root_process, ierr, i, num_rows, num_procs,
+	
+	int rank, root_process, ierr, num_rows, num_procs,
 	 an_id, num_rows_to_receive, avg_rows_per_process, 
 	 sender, num_rows_received, start_row, end_row, num_rows_to_send;
 
-	/* Now replicte this process to create parallel processes.
-	* From this point on, every process executes a seperate copy
-	* of this program */
-
+	// Initialize MPI.
 	ierr = MPI_Init(&argc, &argv);
 
-	root_process = 0;
-
+	
 	/* find out MY process ID, and how many processes were started. */
-	ierr = MPI_Comm_rank(MPI_COMM_WORLD, &my_id);
-	ierr = MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+	
+	ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank); 			// Determine this process's rank.
+	
+	ierr = MPI_Comm_size(MPI_COMM_WORLD, &num_procs);  		// Determine the number of available processes.
 
-	if(my_id == root_process) {
-		printf("hello! My id is %d of %d\n", my_id, num_procs);
-	}	
+	if ( rank == 0 ) 
+		printf("Hello! My rank (my_id) is %d of %d\n", rank, num_procs);
+		
+	// Terminate MPI.
 	ierr = MPI_Finalize();
+
+	if ( rank == 0 ) 
+        printf ( "\nNormal end of execution.\n" );
+
+  	return 0;
 }
