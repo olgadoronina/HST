@@ -1,3 +1,14 @@
+#ifndef IO_HEADER
+#define IO_HEADER
+
+#ifdef GLOBAL_DATA
+   #define EXTERNAL
+   #define DEFAULT(X) = X
+#else
+#define EXTERNAL extern
+   #define DEFAULT(X)
+#endif
+
 // Default system includes
 #include <math.h>
 #include <stdio.h>
@@ -21,6 +32,8 @@ using namespace std;
 #define kHuge     1e+16
 #define kHugeFlt  1e+8
 
+#define TwoNinth 2/9
+
 //----------------------------------------------------------------------------------------------------------------------
 // Position of coordinates and variables
 //----------------------------------------------------------------------------------------------------------------------
@@ -32,6 +45,8 @@ using namespace std;
 #define Var_U  0                  //позиция Х-скорости
 #define Var_V  1                  //позиция Y-скорости
 #define Var_W  2                  //позиция Z-скорости
+// #define Mask   3                   //позиция флага Mask
+
 //#define Var_P  4                  //позиция давления
 //#define Var_N  5                  //число базовых переменных без учета турбуля
 // #define Var_NN 25                 //квадрат предыдушего числа
@@ -44,41 +59,49 @@ using namespace std;
 // #define Var_NumMax 8              //пусть уж кратно 64 байтам
 // //----------------------------------------------------------------------------------------------------------------------
 
-MPI_Status status;
-int MyID, ierr, num_procs;
-int ipic;
+
 
     
-int NnLocalx, NnLocaly, NnLocalz;                 // Number of grid nodes for each processor
-
-int Nn;                 // Number of grid nodes
+EXTERNAL int NnLocalx, NnLocaly, NnLocalz, Nx;                 // Number of grid nodes for each processor
+EXTERNAL int NnLocal;
+EXTERNAL int Nn;                 // Number of grid nodes
 //----------------------------------------------------------------------------------------------------------------------
 
-int KT;                     // Step number
-double DT;                  // Time step						
-double TIME;					
-bool noinitialrandom;
+EXTERNAL int KT DEFAULT(0);                     // Step number
+EXTERNAL double DT DEFAULT(0);                  // Time step						
+EXTERNAL double TIME DEFAULT(0);					
+EXTERNAL bool noinitialrandom;
 
 #define NumCoords 3
 #define crash(...) exit(fprintf(stderr, __VA_ARGS__))
 //----------------------------------------------------------------------------------------------------------------------
 
-// Functions
 
-//======================================================================================================================
-inline int IfInt(double number) { return fmod(number,1) == 0; } // Check if number is integer
-//======================================================================================================================
+
 void MakeDir(string path);
 void IO_MakeOutDirs();
-void InitCaseDim();
 void IO_WriteCaseDim(); 		//Write case dimention in the file ./dim.dat
 void IO_ArrayToFile(const char* fname, const double* array, int size);
-   
 
 
 
+EXTERNAL MPI_Status status;
+EXTERNAL int MyID, ierr, num_procs;
+EXTERNAL int ipic;
+
+#define MPI_SUCCESS 0
 
 
+void InitMeanShear();
+void InitMPI(int *argc,char ***argv);
+void InitCaseDim();
+void InitCaseParams();
+void CoorInit();
+void WaveNumSetup();
+
+
+double FillMask(int localNn);
+double EnergyCalc(double k,double kmax);
 // Constatnts
 //===Grid dimensions=====================================================
 //int nyg,nzg,my,mz;
@@ -97,10 +120,9 @@ void IO_ArrayToFile(const char* fname, const double* array, int size);
 
 
 //Should be in params
-#define ibyte 4                // Word size in bytes (precision)
-int Nx = 64;                 // Grid dimension x
 #define Ny 64                 // Grid dimension y (ny must equal nz)
 #define Nz 64                 // Grid dimension z (ny must equal nz)
+#define Nx_init 64                 // Grid dimension x
 //#define nyzg 2                 // Number of processors (must not be greater than ny/2)
 #define R_inv 1./300.          // Viscosity (~inverse Reynolds number) 
 #define shear 0.5                  // Shear rate for the flow = 2*S/pi
@@ -116,8 +138,12 @@ int Nx = 64;                 // Grid dimension x
 
 
 #define SYMMETRIC 1
+\
 
-
+//======================================================================================================================
+inline int IfInt(double number) { return fmod(number,1) == 0; } // Check if number is integer
+//======================================================================================================================
+inline int SQR(int x){ return x*x;}
 //======================================================================================================================
 // Memory interface
 //======================================================================================================================
@@ -207,14 +233,26 @@ public:
     tBlockArray(const BaseType &b); // force compiler not to create default copy constructor    
 };
 //======================================================================================================================
-static double* ux_eq = NULL; 
-double* wave_num_x = NULL;
-double* wave_num_y = NULL;
-double* wave_num_z = NULL;
 
-tBlockArray<double> UA;       // velocity field
-tBlockArray<double> RHS_UA;   // velocity equation rhs
-tBlockArray<double> Coor;     // Coordinates
-tBlockArray<double> ImUA;     // Imaginary part of solution
+EXTERNAL tBlockArray<double> UA;       // velocity field
+EXTERNAL tBlockArray<double> UA_Im;     // Imaginary part of solution
+EXTERNAL tBlockArray<double> RHS_UA;   // velocity equation rhs
+EXTERNAL tBlockArray<int> Coor;     // Coordinates
+
+
+EXTERNAL double* ux_eq DEFAULT(NULL); 
+
+// EXTERNAL double* Ux_k DEFAULT(NULL);
+// EXTERNAL double* Uy_k DEFAULT(NULL);
+// EXTERNAL double* Uz_k DEFAULT(NULL);
+
+
+EXTERNAL double* Wave_num_x DEFAULT(NULL);
+EXTERNAL double* Wave_num_y DEFAULT(NULL);
+EXTERNAL double* Wave_num_z DEFAULT(NULL);
+
 
 //===Wavenumbers=========================================================
+
+
+#endif
