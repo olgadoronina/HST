@@ -82,7 +82,7 @@ void MakeDir(string path);
 void IO_MakeOutDirs();
 void IO_WriteCaseDim(); 		//Write case dimention in the file ./dim.dat
 void IO_ArrayToFile(const char* fname, const double* array, int size);
-
+void IO_DivToFile();
 
 
 EXTERNAL MPI_Status status;
@@ -98,10 +98,15 @@ void InitCaseDim();
 void InitCaseParams();
 void CoorInit();
 void WaveNumSetup();
+void TurbFieldInit();
 
 
 double FillMask(int localNn);
 double EnergyCalc(double k,double kmax);
+void ResetUA();
+void Symmetrize();
+void CheckDivergence();
+double MaxAbsValue(const double* array, int N);
 // Constatnts
 //===Grid dimensions=====================================================
 //int nyg,nzg,my,mz;
@@ -138,10 +143,14 @@ double EnergyCalc(double k,double kmax);
 
 
 #define SYMMETRIC 1
-\
+
 
 //======================================================================================================================
+inline int GetNodeNum(int X, int Y, int Z) { return X*Ny*Nz + Y*Nz + Z; } // Return the topological number of the node
+//======================================================================================================================
 inline int IfInt(double number) { return fmod(number,1) == 0; } // Check if number is integer
+//======================================================================================================================
+inline double SQR(double x){ return x*x;}
 //======================================================================================================================
 inline int SQR(int x){ return x*x;}
 //======================================================================================================================
@@ -242,9 +251,8 @@ EXTERNAL tBlockArray<int> Coor;     // Coordinates
 
 EXTERNAL double* ux_eq DEFAULT(NULL); 
 
-// EXTERNAL double* Ux_k DEFAULT(NULL);
-// EXTERNAL double* Uy_k DEFAULT(NULL);
-// EXTERNAL double* Uz_k DEFAULT(NULL);
+EXTERNAL double* Div_Im DEFAULT(NULL);
+
 
 
 EXTERNAL double* Wave_num_x DEFAULT(NULL);

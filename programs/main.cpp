@@ -33,8 +33,11 @@ int main(int argc, char *argv[]){
 // Setup wavenumbers
 	WaveNumSetup();
 
-// Initialize or load Fourier fields 
+// Initialize Fourier fields 
+	TurbFieldInit();
 
+	ResetUA();
+	Symmetrize();
 
 
 

@@ -132,7 +132,7 @@ void TurbFieldInit(){ // //Create initial turbulent fields
 		int Y = Coor[in][Coor_Y];
 		int Z = Coor[in][Coor_Z];
 
-		if (Z == Nz/2+1) continue;  // если попали в середину? (проверить нужени ли +1) по z, то почкму-то ничего не делаем
+		if (Z == Nz/2+1) continue;  // если попали в середину? (проверить нужени ли +1) по z, то почкму-то ничего не делаем !!! Проверить
 
   		double Wave_num = sqrt(SQR(Wave_num_x[X]) + SQR(Wave_num_y[Y]) + SQR(Wave_num_z[Z]));
 		
@@ -141,9 +141,10 @@ void TurbFieldInit(){ // //Create initial turbulent fields
 		double ef = mask*sqrt(energy_k)/sqrt(Pi2)/Wave_num;
 		
 		if ( ef <= 0 || mask == 0. || in == 0) {   //also set the k=0 mode to (0.0.0)
-			UA_Im[in][Coor_X] = 0.0; 
-			UA_Im[in][Coor_Y] = 0.0; 
-			UA_Im[in][Coor_Z] = 0.0; 
+			UA[in][Coor_X] = 0.0; 	UA_Im[in][Coor_X] = 0.0; 
+			UA[in][Coor_Y] = 0.0; 	UA_Im[in][Coor_Y] = 0.0; 
+			UA[in][Coor_Z] = 0.0; 	UA_Im[in][Coor_Z] = 0.0; 
+			continue;
 		}
 
 		//----------Generate random phases
@@ -152,8 +153,7 @@ void TurbFieldInit(){ // //Create initial turbulent fields
 		double theta3 = (double) rand();   
 		double phi    = (double) rand();  
 
-		// original formula : argc=ima*Pi2*theta1; alpha =ef*cexp(argc)*cos(Pi2*phi) , where complex ima = (0,1) 
-		// Since e^(i* 2*pi*theta) = i*sin(2*pi*theta)
+		// original formula : argc=ima*Pi2*theta1; alpha =ef*cexp(argc)*cos(Pi2*phi) , where complex ima = (0,1). Use that e^(i* 2*pi*theta) = i*sin(2*pi*theta)
 		double alpha_Im = ef*sin(theta1)*cos(phi);
 		double beta_Im  = ef*sin(theta2)*sin(phi);
 		double delta_Im = ef*sin(theta3);

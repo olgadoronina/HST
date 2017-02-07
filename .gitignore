@@ -1,4 +1,8 @@
 *.[oa]
 *~
-*.out
-OUTPUT/
+bin/
+bin/*
+lib/
+lib/*
+obj/
+obj/*

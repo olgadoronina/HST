@@ -47,3 +47,20 @@ void IO_ArrayToFile(const char* fname, const double* array, int size){ // Write 
     }
     //Barrier();
 }
+
+//======================================================================================================================
+void IO_DivToFile() { // Write divergence to file  // надо распаллалелить !!!!
+//======================================================================================================================
+    if( MyID == 0 ){      
+        double div_max = MaxAbsValue(Div_Im, Nn);
+        FILE *fp = fopen("./OUTPUT/div.dat", "at");
+        if (fp == NULL) crash("IO_DivToFile(): Can't open file (probably there is no OUTPUT folder)\n");
+        fprintf(fp, "Maximum divergence (time, max div):\n%f\t%f\n", TIME, div_max);
+        fclose(fp);
+        printf("Maximum divergence (time, max div):\n%f\t%f\n", TIME, div_max);
+    }
+    //Barrier();
+}
+
+
+   
