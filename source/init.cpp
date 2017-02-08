@@ -1,5 +1,5 @@
 #define GLOBAL_DATA
-#include "io.h"
+#include "all.h"
 
 
 //======================================================================================================================
@@ -28,8 +28,12 @@ void InitCaseDim(){ // Define case dimention according possible symmetry
 		crash("InitCaseDim(): NnLocal: Nx or Ny or Nz should be divisible by num_procs, DO IT MANUALLY\n");
 
 	Nn = Nx*Ny*Nz;
-
-	if (IfInt(Nx/(double)num_procs)) NnLocal = Nn/num_procs;
+	printf("InitCaseDim():  Nn = %d\n",Nn);
+	
+	if (IfInt(Nx/(double)num_procs)) {
+		NnLocal = Nn/num_procs;
+		printf("InitCaseDim():  NnLocal = %d\n",NnLocal);
+	}
 	else crash("InitCaseDim(): NnLocal: Nx*Ny*Nz should be divisible by num_procs, DO IT MANUALLY\n");
  
 }
@@ -98,12 +102,13 @@ void CoorInit(){ // Fullfill the Coor array (array of coordinates)
 	for (int ix=0; ix<Nx; ix++)	
 		for (int iy=0; iy<Ny; iy++)
 			for (int iz=0; iz<Nz; iz++) {
-				Coor[ix+iy+iz][Coor_X] = ix;
-				Coor[ix+iy+iz][Coor_Y] = iy;
-				Coor[ix+iy+iz][Coor_Z] = iz;
+				Coor[ ix*Ny*Nz + iy*Nz + iz ][Coor_X] = ix;
+				Coor[ ix*Ny*Nz + iy*Nz + iz ][Coor_Y] = iy;
+				Coor[ ix*Ny*Nz + iy*Nz + iz ][Coor_Z] = iz;
 			}
 }
 //======================================================================================================================
+
 
 //======================================================================================================================
 void WaveNumSetup(){ // Set case parameters
@@ -127,19 +132,19 @@ void TurbFieldInit(){ // //Create initial turbulent fields
 		int in = MyID*NnLocal+n; 		//определяем номера для узла
 	 	
 	 	double mask = FillMask(in); 	// посчитали загадочный флаг
-
+	 	//printf ( "Turb 1\n" );
 		int X = Coor[in][Coor_X];		
 		int Y = Coor[in][Coor_Y];
 		int Z = Coor[in][Coor_Z];
 
-		if (Z == Nz/2+1) continue;  // если попали в середину? (проверить нужени ли +1) по z, то почкму-то ничего не делаем !!! Проверить
+		//if (Z == Nz/2) continue;  // если попали в середину? (проверить нужени ли +1) по z, то почкму-то ничего не делаем !!! Проверить
 
   		double Wave_num = sqrt(SQR(Wave_num_x[X]) + SQR(Wave_num_y[Y]) + SQR(Wave_num_z[Z]));
 		
 		//  Spectral function call	   
 		double energy_k = EnergyCalc(Wave_num,kmax); 		// energy calculated using wave number
 		double ef = mask*sqrt(energy_k)/sqrt(Pi2)/Wave_num;
-		
+		//printf ( "Turb 2 %d\n", in );
 		if ( ef <= 0 || mask == 0. || in == 0) {   //also set the k=0 mode to (0.0.0)
 			UA[in][Coor_X] = 0.0; 	UA_Im[in][Coor_X] = 0.0; 
 			UA[in][Coor_Y] = 0.0; 	UA_Im[in][Coor_Y] = 0.0; 
@@ -172,13 +177,14 @@ void TurbFieldInit(){ // //Create initial turbulent fields
 			UA_Im[in][Coor_Y] = (coef2*Wave_num_y[Y] + coef1*Wave_num_x[X])/coef3;
 			UA_Im[in][Coor_Z] = -beta_Im*sqrt(SQR(Wave_num_x[X]) + SQR(Wave_num_y[Y]))/Wave_num; 
 	   	}
-
+	   	//printf ( "Turb 3\n" );
 	   	// Real part equal zero in any case
 	   	// !!! Почему-то в оригинале заполняют только массив локального размера по z, то есть NnLocal_z (для комплексно часть тоже)
 		UA[in][Coor_X] = 0.0; 
 		UA[in][Coor_Y] = 0.0; 
 		UA[in][Coor_Z] = 0.0; 
 	}
+	printf ( "Turb Finished\n" );
 
 }
 

@@ -1,4 +1,4 @@
-#include "io.h"
+#include "all.h"
 
 
 //======================================================================================================================
@@ -23,7 +23,7 @@ void IO_WriteCaseDim(){ // Write case dimensions to file
 //======================================================================================================================
     if( MyID == 0 ){
 		FILE *fp = fopen("./OUTPUT/dims.dat", "wt");
-		if (fp == NULL) crash("IO_ArrayToFile: Can't open file (probably there is no OUTPUT folder)\n");
+		if (fp == NULL) crash("IO_WriteCaseDim(): Can't open file (probably there is no OUTPUT folder)\n");
     	fprintf(fp, "%d\t%d\t%d\t%d\n", Nx, Ny, Nz, num_procs);
     	//fputs("This is testing for fputs...\n", fp);
     	fclose(fp);
