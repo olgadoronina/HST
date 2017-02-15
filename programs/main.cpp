@@ -2,40 +2,45 @@
 
 int main(int argc, char *argv[]){
 
-	IO_MakeOutDirs();
-	printf ( "Step 1\n" );
 	InitMPI(&argc,&argv);
-	printf ( "Step 2\n" );
+	//printf ( "MyID = %d\tStep 1\n", MyID );
+	IO_MakeOutDirs();
+	//printf ( "MyID = %d\tStep 2\n", MyID );
 	InitCaseDim();
-	printf ( "Step 3\n" );
+	//printf ( "MyID = %d\tStep 3\n", MyID );
 	InitCaseParams();
-	printf ( "Step 4\n" );
+	//printf ( "MyID = %d\tStep 4\n", MyID );
+	VisuaInit();
 // //----------------------------------------------------------------------------------------------------------------------
 // //  Initialize arrays
 // //----------------------------------------------------------------------------------------------------------------------
 // Coordinates
 	CoorInit();
-	printf ( "Step 5\n" );
+	printf ( "MyID = %d\tStep 3\n", MyID );
 // Zero fields
 	UA.Alloc(Nn, NumCoords, "UA"); UA = 0.0;   					// real part of velocity field
 	UA_Im.Alloc(Nn, NumCoords, "UA"); UA_Im = 0.0;   			// imaginary part of velocity field
 	//RHS_UA.Alloc(Nn, NumCoords, "RHS_UA"); RHS_UA = 0.0;   		// velocity equation rhs
-	printf ( "Step 6\n" );
+	printf ( "MyID = %d\tStep 4\n", MyID );
 // Set mean shear profile
 	InitMeanShear();
-	printf ( "Step 7\n" );
+	printf ( "MyID = %d\tStep 5\n", MyID );
 // Setup wavenumbers
 	WaveNumSetup();
-	printf ( "Step 8\n" );
+	printf ( "MyID = %d\tStep 6\n", MyID );
 // Initialize Fourier fields 
 	TurbFieldInit();
-	printf ( "Step 9\n" );
+	printf ( "MyID = %d\tStep 7\n", MyID );
 	ResetUA();
-	printf ( "Step 10\n" );
+	printf ( "MyID = %d\tStep 8\n", MyID );
 	Symmetrize();
-	printf ( "Step 11\n" );
+	printf ( "MyID = %d\tStep 9\n", MyID );
 
-
+	//UA.PrintToFile("./OUTPUT/initUA.dat");
+	if ( MyID ==0 ) {
+		tVisuaRecord record;
+		record.WriteStructuredGrid("./OUTPUT/VISUA/init.vts");
+	}
 // Terminate MPI.
 	MPI_Finalize();
 

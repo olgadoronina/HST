@@ -14,7 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <string.h>
+// #include <string.h>
+#include <sstream>
 using namespace std;
 
 #include <mpi.h>
@@ -79,10 +80,11 @@ using namespace std;
 //Should be in params
 
 // I already use
-#define Ny 4                 // Grid dimension y (ny must equal nz)
-#define Nz 4                 // Grid dimension z (ny must equal nz)
-#define Nx_init 4                 // Grid dimension x
+#define Ny 64                 // Grid dimension y (ny must equal nz)
+#define Nz 64                 // Grid dimension z (ny must equal nz)
+#define Nx_init 64                 // Grid dimension x
 #define shear 0.5                  // Shear rate for the flow = 2*S/pi
+
 // I don't use yet
 #define R_inv 1./300.          // Viscosity (~inverse Reynolds number) 
 #define epsin 0.01             // Energy dissipation rate
@@ -190,13 +192,23 @@ public:
     inline ValueType *operator[](int i) const {return V+i*M;}
 
     // prototypes for additional debug functionality for tBlockArray (in utils.cpp)
-    //void PrintToFile(const char* fname);
+    void PrintToFile(const char* fname);
+    inline void PrintToFile(string fname) { PrintToFile(fname.c_str()); }
  private:
     tBlockArray(const BaseType &b); // force compiler not to create default copy constructor    
 };
 //======================================================================================================================
 
 
+
+
+//======================================================================================================================
+
+template <typename ValueType> string ToString(ValueType val) {
+    ostringstream stream;
+    stream << val;
+    return stream.str();
+}
 
 
 

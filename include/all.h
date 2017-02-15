@@ -2,4 +2,5 @@
 #include "io.h"
 #include "init.h"
 #include "utils.h"
-#include "visit_writer.h"
+#include "xml_writer.h"
+#include "visua.h"

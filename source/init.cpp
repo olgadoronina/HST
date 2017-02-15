@@ -5,36 +5,43 @@
 //======================================================================================================================
 void InitCaseDim(){ // Define case dimention according possible symmetry
 //======================================================================================================================
-	IO_WriteCaseDim();				// Write case dimensions to file
-	
-	if (SYMMETRIC == 1)
+	if (SYMMETRIC == 1) {
 		if (Nx_init/2. == 0) {
 			Nx = Nx_init/2.+1;
-		    if( MyID == 0 ) printf("InitCaseDim(): Due simmetry new Nx = %d\n",Nx);
+		    if( MyID == 0 ) printf("InitCaseDim():\tDue simmetry new Nx = %d\n",Nx);
 		} 
 		else {
 			Nx = Nx_init/2;
-			if( MyID == 0 ) printf("InitCaseDim(): Due simmetry new Nx = %d\n",Nx);
+			if( MyID == 0 ) printf("InitCaseDim():\tDue simmetry new Nx = %d\n",Nx);
 		}
+	}
+	Dims = GimmeMem<int>(NumCoords, "Dims");
+	Dims[Coor_X] = Nx;
+	Dims[Coor_Y] = Ny;
+	Dims[Coor_Z] = Nz;
 
 	if ( IfInt(Nx/(double)num_procs) && IfInt(Nx/(double)num_procs) && IfInt(Nx/(double)num_procs) ) {
-		NnLocalx = Nx/num_procs;
-		NnLocaly = Ny/num_procs;
-		NnLocalz = Nz/num_procs;
+		Dims_Local = GimmeMem<int>(NumCoords, "Dims_Local");
+		Dims_Local[Coor_X] = Nx/num_procs;
+		Dims_Local[Coor_Y] = Ny/num_procs;
+		Dims_Local[Coor_Z] = Nz/num_procs;
 		if( MyID == 0 ) 
-			printf("InitCaseDim():  NnLocalx = %d\tNnLocaly = %d\tNnLocalz = %d\n",NnLocalx,NnLocaly,NnLocalz);
+			printf("InitCaseDim():\tNnLocalx = %d\tNnLocaly = %d\tNnLocalz = %d\n", 
+						Dims[Coor_X], Dims[Coor_Y], Dims[Coor_Z]);
 	}
 	else 
-		crash("InitCaseDim(): NnLocal: Nx or Ny or Nz should be divisible by num_procs, DO IT MANUALLY\n");
+		crash("InitCaseDim():\tNnLocal: Nx or Ny or Nz should be divisible by num_procs, DO IT MANUALLY\n");
 
 	Nn = Nx*Ny*Nz;
-	printf("InitCaseDim():  Nn = %d\n",Nn);
+	printf("InitCaseDim():\tNn = %d\n",Nn);
 	
 	if (IfInt(Nx/(double)num_procs)) {
 		NnLocal = Nn/num_procs;
-		printf("InitCaseDim():  NnLocal = %d\n",NnLocal);
+		printf("InitCaseDim():\tNnLocal = %d\n",NnLocal);
 	}
-	else crash("InitCaseDim(): NnLocal: Nx*Ny*Nz should be divisible by num_procs, DO IT MANUALLY\n");
+	else crash("InitCaseDim():\tNnLocal: Nx*Ny*Nz should be divisible by num_procs, DO IT MANUALLY\n");
+
+	IO_WriteCaseDim();				// Write case dimensions to file
  
 }
 //======================================================================================================================
@@ -66,8 +73,7 @@ void InitMPI(int *argc, char ***argv){ // Initialization of MPI
 	// ierr = MPI_Comm_rank(MPI_COMM_WORLD, &MyID); 			// Determine this process's rank.
 	// ierr = MPI_Comm_size(MPI_COMM_WORLD, &num_procs);  		// Determine the number of available processes.
 
-	if ( MyID == 0 ) 
-		printf("Hello! My rank (my_id) is %d of %d\n", MyID, num_procs);
+	printf("Hello! My rank (my_id) is %d of %d\n", MyID, num_procs);
 }
 //======================================================================================================================
 
@@ -130,9 +136,9 @@ void TurbFieldInit(){ // //Create initial turbulent fields
 
 	for (int n=0; n<NnLocal; n++) {
 		int in = MyID*NnLocal+n; 		//определяем номера для узла
-	 	
+	 	//printf ( "MyID = %d\tTurb 0\t%d\t%d\n", MyID, n ,in);
 	 	double mask = FillMask(in); 	// посчитали загадочный флаг
-	 	//printf ( "Turb 1\n" );
+	 	//printf ( "MyID = %d\tTurb 1\t%d\t%d\n", MyID, n ,in);
 		int X = Coor[in][Coor_X];		
 		int Y = Coor[in][Coor_Y];
 		int Z = Coor[in][Coor_Z];
@@ -151,7 +157,7 @@ void TurbFieldInit(){ // //Create initial turbulent fields
 			UA[in][Coor_Z] = 0.0; 	UA_Im[in][Coor_Z] = 0.0; 
 			continue;
 		}
-
+		//printf ( "MyID = %d\tTurb 2\t%d\t%d\n", MyID, n ,in);
 		//----------Generate random phases
 		double theta1 = (double) rand();
 		double theta2 = (double) rand();

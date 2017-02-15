@@ -28,5 +28,6 @@ void WaveNumSetup();
 void TurbFieldInit();
 
 EXTERNAL double* ux_eq DEFAULT(NULL); 
-
+EXTERNAL int* Dims DEFAULT(NULL); 
+EXTERNAL int* Dims_Local DEFAULT(NULL);
 #endif

@@ -2,11 +2,17 @@
 //======================================================================================================================
 double FillMask(int local_n){
 //======================================================================================================================
+	//printf ( "MyID = %d\tFillMask 0\t%d\n", MyID,local_n);
+
+	int X = Coor[local_n][Coor_X];		
+	int Y = Coor[local_n][Coor_Y];
+	int Z = Coor[local_n][Coor_Z];
 	if (Coor[local_n][Coor_Z] == Nz/2) return 0.0;          // Wave_num_z=N/2 always gets mask=0. 
 	if (Coor[local_n][Coor_Y] == Ny/2) return 0.0; 			// Wave_num_y=N/2 always gets mask=0.
-	
-	double  Wave_num_SQR = SQR(Wave_num_x[local_n]/Nx_init) + SQR(Wave_num_y[local_n]/Ny) + SQR(Wave_num_z[local_n]/Nz);
+	//printf ( "MyID = %d\tFillMask 1\t%d\n", MyID,local_n);
 
+	double  Wave_num_SQR = SQR(Wave_num_x[X]/Nx_init) + SQR(Wave_num_y[Y]/Ny) + SQR(Wave_num_z[Z]/Nz);
+	//printf ( "MyID = %d\tFillMask 2\t%d\n", MyID,local_n);
 	if(Wave_num_SQR > TwoNinth) 
 		return 0.0;
 	else
