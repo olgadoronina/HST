@@ -27,7 +27,7 @@ void IO_WriteCaseDim(){ // Write case dimensions to file
     	fprintf(fp, "%d\t%d\t%d\t%d\n", Dims[Coor_X] , Dims[Coor_Y] , Dims[Coor_Z] , num_procs);
     	//fputs("This is testing for fputs...\n", fp);
     	fclose(fp);
-    	printf("MyID = %d\tIO_WriteCaseDim(): Write case dimentions\n", MyID);
+    	printf("MyID = %d\tIO_WriteCaseDim(): Write case dimensions\n", MyID);
     }
     //Barrier();
 }

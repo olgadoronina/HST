@@ -4,3 +4,4 @@
 #include "utils.h"
 #include "xml_writer.h"
 #include "visua.h"
+#include "par.h"

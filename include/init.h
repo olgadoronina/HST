@@ -20,7 +20,6 @@ EXTERNAL int NnLocal;
 EXTERNAL int Nn;                 // Number of grid nodes
 
 void InitMeanShear();
-void InitMPI(int *argc,char ***argv);
 void InitCaseDim();
 void InitCaseParams();
 void CoorInit();

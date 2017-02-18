@@ -33,7 +33,7 @@ using namespace std;
 #define kHuge     1e+16
 #define kHugeFlt  1e+8
 
-#define TwoNinth 2/9
+#define TwoNinth 2./9
 
 //----------------------------------------------------------------------------------------------------------------------
 // Position of coordinates and variables
@@ -62,7 +62,7 @@ using namespace std;
 
 
 
-// Constatnts
+// Constants
 //===Grid dimensions=====================================================
 //int nyg,nzg,my,mz;
 //int nxh,nxhp,nyh,nyhp,nzh,nzhp;
@@ -80,9 +80,9 @@ using namespace std;
 //Should be in params
 
 // I already use
-#define Ny 64                 // Grid dimension y (ny must equal nz)
-#define Nz 64                 // Grid dimension z (ny must equal nz)
-#define Nx_init 64                 // Grid dimension x
+#define Ny 2                 // Grid dimension y (ny must equal nz)
+#define Nz 2                 // Grid dimension z (ny must equal nz)
+#define Nx_init 7                 // Grid dimension x
 #define shear 0.5                  // Shear rate for the flow = 2*S/pi
 
 // I don't use yet

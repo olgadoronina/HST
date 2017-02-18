@@ -1,27 +1,24 @@
 #include "all.h"
 //======================================================================================================================
-double FillMask(int local_n){
+int FillMask(int local_n){
 //======================================================================================================================
-	//printf ( "MyID = %d\tFillMask 0\t%d\n", MyID,local_n);
 
 	int X = Coor[local_n][Coor_X];		
 	int Y = Coor[local_n][Coor_Y];
 	int Z = Coor[local_n][Coor_Z];
-	if (Coor[local_n][Coor_Z] == Nz/2) return 0.0;          // Wave_num_z=N/2 always gets mask=0. 
-	if (Coor[local_n][Coor_Y] == Ny/2) return 0.0; 			// Wave_num_y=N/2 always gets mask=0.
-	//printf ( "MyID = %d\tFillMask 1\t%d\n", MyID,local_n);
+	if (Z == Nz/2) return 0.0;          // Wave_num_z=N/2 always gets mask=0. 
+	if (Y == Ny/2) return 0.0; 			// Wave_num_y=N/2 always gets mask=0.
 
-	double  Wave_num_SQR = SQR(Wave_num_x[X]/Nx_init) + SQR(Wave_num_y[Y]/Ny) + SQR(Wave_num_z[Z]/Nz);
-	//printf ( "MyID = %d\tFillMask 2\t%d\n", MyID,local_n);
+	double Wave_num_SQR = SQR(Wave_num_x[X]/Nx_init) + SQR(Wave_num_y[Y]/Ny) + SQR(Wave_num_z[Z]/Nz);
 	if(Wave_num_SQR > TwoNinth) 
-		return 0.0;
+		return 0;
 	else
-	 	return 1.0;
+	 	return 1;
 }
 //======================================================================================================================
 
 //======================================================================================================================
-double EnergyCalc(double k,double kmax) { // specification of initial 3-d energy spectrum in waveno space
+double EnergyCalc(double k, double kmax) { // specification of initial 3-d energy spectrum in waveno space
 //======================================================================================================================
 	double k0 = 1.;
 	//-------128/256/512 cube	 
@@ -33,10 +30,10 @@ double EnergyCalc(double k,double kmax) { // specification of initial 3-d energy
 
 	if (k >= k0 && k <= kp) 
 	 	return gamma*k*k; 
-	else if (k > kp && k <= kmax)
+	if (k > kp && k <= kmax)
 		return pow(gamma*kp,11./3.)*pow(k,-5./3.);
-	else
-		return 0.0;
+
+	return 0.0;
 }
 //======================================================================================================================
 
@@ -85,7 +82,7 @@ void Symmetrize() { // Apply symmetry constraint
 //======================================================================================================================
 void CheckDivergence() { // Check divergence
 //======================================================================================================================
-	if ( Div_Im = NULL ) Div_Im = GimmeMem<double>(Nn, "Div_Im"); 
+	if ( Div_Im == NULL ) Div_Im = GimmeMem<double>(Nn, "Div_Im");
 	// Calculate divergence
 	for (int in; in<Nn; in++)
     	Div_Im[in]= Wave_num_x[Coor[in][Coor_X]] * UA[in][Coor_X] + 

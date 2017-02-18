@@ -16,7 +16,7 @@ echo "==========================================================="
 echo " Compiling script for HST Code "
 echo "==========================================================="
 echo 
-echo "Compiling sourses..."
+echo "Compiling sources..."
 mkdir -p bin
 mkdir -p obj
 rm -f bin/*.$SUFF

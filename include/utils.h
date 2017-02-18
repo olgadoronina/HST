@@ -14,7 +14,7 @@
 EXTERNAL double* Div_Im DEFAULT(NULL);
 
 
-double FillMask(int localNn);
+int FillMask(int localNn);
 double EnergyCalc(double k,double kmax);
 void ResetUA();
 void Symmetrize();

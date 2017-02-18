@@ -8,6 +8,7 @@
 
 class XmlWriter {
 
+
 public:
 
     inline void EndStartedTag(){ fprintf(outfile,">\n"); }
@@ -22,7 +23,7 @@ public:
     void WriteData(const std::string outString);
     void FinishFile();
 
-
+private:
     FILE *outfile;
     int indent;
     int openTags;

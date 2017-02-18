@@ -17,7 +17,7 @@
 
 void MakeDir(string path);
 void IO_MakeOutDirs();
-void IO_WriteCaseDim(); 		//Write case dimention in the file ./dim.dat
+void IO_WriteCaseDim(); 		//Write case dimension in the file ./dim.dat
 void IO_ArrayToFile(const char* fname, const double* array, int size);
 void IO_DivToFile();
 

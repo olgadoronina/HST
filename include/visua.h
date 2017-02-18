@@ -27,10 +27,5 @@ public:
 	void WriteStructuredGrid(const char *filename);
 };
 
-
-
-
-
-
 #endif
 

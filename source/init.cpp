@@ -3,16 +3,16 @@
 
 
 //======================================================================================================================
-void InitCaseDim(){ // Define case dimention according possible symmetry
+void InitCaseDim(){ // Define case dimension according possible symmetry
 //======================================================================================================================
 	if (SYMMETRIC == 1) {
-		if (Nx_init/2. == 0) {
-			Nx = Nx_init/2.+1;
-		    if( MyID == 0 ) printf("InitCaseDim():\tDue simmetry new Nx = %d\n",Nx);
+		if (Nx_init%2 != 0) {
+			Nx = Nx_init/2+1;
+		    if( MyID == 0 ) printf("InitCaseDim():\tDue symmetry new Nx = %d\n",Nx);
 		} 
 		else {
 			Nx = Nx_init/2;
-			if( MyID == 0 ) printf("InitCaseDim():\tDue simmetry new Nx = %d\n",Nx);
+			if( MyID == 0 ) printf("InitCaseDim():\tDue symmetry new Nx = %d\n",Nx);
 		}
 	}
 	Dims = GimmeMem<int>(NumCoords, "Dims");
@@ -56,26 +56,6 @@ void InitCaseParams(){ // Set case parameters
 }
 //======================================================================================================================
 
-//======================================================================================================================
-void InitMPI(int *argc, char ***argv){ // Initialization of MPI
-//======================================================================================================================
-	MyID=0; num_procs=1;
-
-	if(MPI_Init(argc,argv) != MPI_SUCCESS) {
-        fprintf(stderr,"MPI_Init failed \n");
-        exit(0);
-    }
-    if(MPI_Comm_rank(MPI_COMM_WORLD,&MyID) != MPI_SUCCESS) { fprintf(stderr,"MPI_Comm_rank failed \n"); exit(0);}
-    if(MPI_Comm_size(MPI_COMM_WORLD,&num_procs) != MPI_SUCCESS) { fprintf(stderr,"MPI_Comm_size failed \n"); exit(0);}
-    //int ll; if(MPI_Get_processor_name(proc_name, &ll) != MPI_SUCCESS) { fprintf(stderr,"MPI_Get_processor_name failed \n"); exit(0);}
-    //MPIinitialized = 1;
-	// ierr = MPI_Init(&argc, &argv); 							// Initialize MPI.
-	// ierr = MPI_Comm_rank(MPI_COMM_WORLD, &MyID); 			// Determine this process's rank.
-	// ierr = MPI_Comm_size(MPI_COMM_WORLD, &num_procs);  		// Determine the number of available processes.
-
-	printf("Hello! My rank (my_id) is %d of %d\n", MyID, num_procs);
-}
-//======================================================================================================================
 
 //======================================================================================================================
 void InitMeanShear(){ // Set mean shear profile
@@ -102,7 +82,7 @@ void InitMeanShear(){ // Set mean shear profile
 }
 
 //======================================================================================================================
-void CoorInit(){ // Fullfill the Coor array (array of coordinates)
+void CoorInit(){ // Fulfill the Coor array (array of coordinates)
 //======================================================================================================================
 	Coor.Alloc(Nn, 3, "Coor"); 									// Coordinates
 	for (int ix=0; ix<Nx; ix++)	
@@ -123,8 +103,12 @@ void WaveNumSetup(){ // Set case parameters
 	Wave_num_y = GimmeMem<double>(Ny, "Wave_num_y");
 	Wave_num_z = GimmeMem<double>(Nz, "Wave_num_z");
 	for( int ix=0; ix<Nx; ix++) Wave_num_x[ix]=(double)ix;							// Setup horizontal wavenumbers
-	for( int iy=0; iy<Ny; iy++) Wave_num_y[iy]=(double)(iy-(iy+1)*Ny/(Ny/2+2));		// Setup vertical wavenumbers
-	for( int iz=0; iz<Nz; iz++) Wave_num_z[iz]=(double)(iz-(iz+1)*Nz/(Nz/2+2));		// Setup spanwise wavenumbers
+	for( int iy=0; iy<Ny; iy++) Wave_num_y[iy]=(double)(iy-(iy+1)/Ny/(Ny/2+2));		// Setup vertical wavenumbers
+	for( int iz=0; iz<Nz; iz++) Wave_num_z[iz]=(double)(iz-(iz+1)/Nz/(Nz/2+2));		// Setup spanwise wavenumbers
+	// IO_ArrayToFile("./OUTPUT/Wave_num_x_cpp.txt", Wave_num_x, Nx);
+	// IO_ArrayToFile("./OUTPUT/Wave_num_y_cpp.txt", Wave_num_y, Ny);
+	// IO_ArrayToFile("./OUTPUT/Wave_num_z_cpp.txt", Wave_num_z, Nz);
+
 }
 //======================================================================================================================
 
@@ -132,60 +116,74 @@ void WaveNumSetup(){ // Set case parameters
 //======================================================================================================================
 void TurbFieldInit(){ // //Create initial turbulent fields
 //======================================================================================================================
-	double kmax = sqrt(2)*Nx_init/3;
+	double kmax = sqrt(2)*Nx_init/3; // Почему определено здесь а не в EnergyCalc()?
 
 	for (int n=0; n<NnLocal; n++) {
-		int in = MyID*NnLocal+n; 		//определяем номера для узла
-	 	//printf ( "MyID = %d\tTurb 0\t%d\t%d\n", MyID, n ,in);
-	 	double mask = FillMask(in); 	// посчитали загадочный флаг
-	 	//printf ( "MyID = %d\tTurb 1\t%d\t%d\n", MyID, n ,in);
+		int in = MyID*NnLocal+n; 		//определяем номер для узла
+
+	 	int mask = FillMask(in); 	// посчитали загадочный флаг
+
 		int X = Coor[in][Coor_X];		
 		int Y = Coor[in][Coor_Y];
 		int Z = Coor[in][Coor_Z];
-
-		//if (Z == Nz/2) continue;  // если попали в середину? (проверить нужени ли +1) по z, то почкму-то ничего не делаем !!! Проверить
-
+		printf("mask = %d\t%d\t%d\t%d\n",mask, X, Y, Z);
+		//if (Z == Nz/2) continue;  // кейс включен в if ef <= 0 
+		if (X >= Nx) continue;  // убрать нафиг
+		
   		double Wave_num = sqrt(SQR(Wave_num_x[X]) + SQR(Wave_num_y[Y]) + SQR(Wave_num_z[Z]));
 		
 		//  Spectral function call	   
 		double energy_k = EnergyCalc(Wave_num,kmax); 		// energy calculated using wave number
 		double ef = mask*sqrt(energy_k)/sqrt(Pi2)/Wave_num;
-		//printf ( "Turb 2 %d\n", in );
-		if ( ef <= 0 || mask == 0. || in == 0) {   //also set the k=0 mode to (0.0.0)
+
+		if ( ef <= 0 || in == 0) {   //also set the k=0 mode to (0.0.0)
 			UA[in][Coor_X] = 0.0; 	UA_Im[in][Coor_X] = 0.0; 
 			UA[in][Coor_Y] = 0.0; 	UA_Im[in][Coor_Y] = 0.0; 
 			UA[in][Coor_Z] = 0.0; 	UA_Im[in][Coor_Z] = 0.0; 
 			continue;
 		}
-		//printf ( "MyID = %d\tTurb 2\t%d\t%d\n", MyID, n ,in);
 		//----------Generate random phases
-		double theta1 = (double) rand();
-		double theta2 = (double) rand();
-		double theta3 = (double) rand();   
-		double phi    = (double) rand();  
+		double theta1 = 2*PiNumber*0.1;//(double) rand();
+		double theta2 = 2*PiNumber*0.2;//(double) rand();
+		// double theta3 = (double) rand();   // нигде не используется?
+		double phi    = 2*PiNumber*0.3;//(double) rand();  
 
-		// original formula : argc=ima*Pi2*theta1; alpha =ef*cexp(argc)*cos(Pi2*phi) , where complex ima = (0,1). Use that e^(i* 2*pi*theta) = i*sin(2*pi*theta)
+		// original formula : argc=ima*Pi2*theta1; alpha =ef*cexp(argc)*cos(Pi2*phi) , where complex ima = (0,1). 
+		// Use that e^(i* 2*pi*theta) = i*sin(2*pi*theta)
+		double alpha = ef*cos(theta1)*cos(phi);
+		double beta  = ef*cos(theta2)*sin(phi);
+		//double delta = ef*cos(theta3);  // нигде не используется?
+
 		double alpha_Im = ef*sin(theta1)*cos(phi);
 		double beta_Im  = ef*sin(theta2)*sin(phi);
-		double delta_Im = ef*sin(theta3);
-
-		if ( Wave_num_x[X] ==0 && Wave_num_y[Y]) {
-			UA_Im[in][Coor_X] = alpha_Im;    
-			UA_Im[in][Coor_Y] = beta_Im;
-			UA_Im[in][Coor_Z] = 0;   
+		//double delta_Im = ef*sin(theta3);  // нигде не используется?
+		printf("%.10e\t%.10e\t%d\t%d\t%d\n", alpha, alpha_Im, X, Y, Z);
+		printf("%.10e\t%.10e\t%d\t%d\t%d\n", beta, beta_Im, X, Y, Z);
+		
+		if ( Wave_num_x[X]==0 && Wave_num_y[Y]==0) {
+			UA[in][Coor_X] = alpha;		UA_Im[in][Coor_X] = alpha_Im;    
+			UA[in][Coor_Y] = beta;		UA_Im[in][Coor_Y] = beta_Im;
+			UA[in][Coor_Z] = 0.0;		UA_Im[in][Coor_Z] = 0.0;   
 		} 
 		else {
-			double coef1 = alpha_Im*Wave_num;
-			double coef2 = beta_Im*Wave_num_z[Z];
-			double coef3 = Wave_num*sqrt(SQR(Wave_num_x[X]) + SQR(Wave_num_y[Y]));
-
-			UA_Im[in][Coor_X] = (coef1*Wave_num_y[Y] + coef2*Wave_num_x[X])/coef3 ;    // странная формула
-			UA_Im[in][Coor_Y] = (coef2*Wave_num_y[Y] + coef1*Wave_num_x[X])/coef3;
+			printf("else\n");
+			double coef1 = alpha*Wave_num;
+			double coef2 = beta*Wave_num_z[Z];
+			double denominator = Wave_num*sqrt(SQR(Wave_num_x[X]) + SQR(Wave_num_y[Y]));
+			
+			UA[in][Coor_X] = (coef1*Wave_num_y[Y] + coef2*Wave_num_x[X])/denominator ;    // странная формула
+			UA[in][Coor_Y] = (coef2*Wave_num_y[Y] + coef1*Wave_num_x[X])/denominator;
+			UA[in][Coor_Z] = -beta*sqrt(SQR(Wave_num_x[X]) + SQR(Wave_num_y[Y]))/Wave_num; 
+			
+			coef1 = alpha_Im*Wave_num;
+			coef2 = beta_Im*Wave_num_z[Z];
+			printf("%.10e\t%.10e\t%d\t%d\t%d\n", coef1, coef2, X, Y, Z);
+			UA_Im[in][Coor_X] = (coef1*Wave_num_y[Y] + coef2*Wave_num_x[X])/denominator ;    // странная формула
+			UA_Im[in][Coor_Y] = (coef2*Wave_num_y[Y] + coef1*Wave_num_x[X])/denominator;
 			UA_Im[in][Coor_Z] = -beta_Im*sqrt(SQR(Wave_num_x[X]) + SQR(Wave_num_y[Y]))/Wave_num; 
 	   	}
 	   	//printf ( "Turb 3\n" );
 	   	// Real part equal zero in any case
-	   	// !!! Почему-то в оригинале заполняют только массив локального размера по z, то есть NnLocal_z (для комплексно часть тоже)
 		UA[in][Coor_X] = 0.0; 
 		UA[in][Coor_Y] = 0.0; 
 		UA[in][Coor_Z] = 0.0; 

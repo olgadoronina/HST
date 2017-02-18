@@ -11,36 +11,46 @@ int main(int argc, char *argv[]){
 	InitCaseParams();
 	//printf ( "MyID = %d\tStep 4\n", MyID );
 	VisuaInit();
-// //----------------------------------------------------------------------------------------------------------------------
-// //  Initialize arrays
-// //----------------------------------------------------------------------------------------------------------------------
-// Coordinates
+	// printf ( "MyID = %d\tStep 5\n", MyID );
 	CoorInit();
-	printf ( "MyID = %d\tStep 3\n", MyID );
+	// printf ( "MyID = %d\tStep 6\n", MyID );
 // Zero fields
-	UA.Alloc(Nn, NumCoords, "UA"); UA = 0.0;   					// real part of velocity field
-	UA_Im.Alloc(Nn, NumCoords, "UA"); UA_Im = 0.0;   			// imaginary part of velocity field
+	UA.Alloc(Nn, NumCoords, "UA"); UA = 2.0;   					// real part of velocity field
+	UA_Im.Alloc(Nn, NumCoords, "UA"); UA_Im = 2.0;   			// imaginary part of velocity field
 	//RHS_UA.Alloc(Nn, NumCoords, "RHS_UA"); RHS_UA = 0.0;   		// velocity equation rhs
-	printf ( "MyID = %d\tStep 4\n", MyID );
+	// printf ( "MyID = %d\tStep 7\n", MyID );
 // Set mean shear profile
-	InitMeanShear();
-	printf ( "MyID = %d\tStep 5\n", MyID );
+	InitMeanShear(); // matches!
+	// printf ( "MyID = %d\tStep 8\n", MyID );
 // Setup wavenumbers
-	WaveNumSetup();
-	printf ( "MyID = %d\tStep 6\n", MyID );
+	WaveNumSetup(); // matches!
+	// printf ( "MyID = %d\tStep 9\n", MyID );
 // Initialize Fourier fields 
 	TurbFieldInit();
-	printf ( "MyID = %d\tStep 7\n", MyID );
-	ResetUA();
-	printf ( "MyID = %d\tStep 8\n", MyID );
-	Symmetrize();
-	printf ( "MyID = %d\tStep 9\n", MyID );
-
-	//UA.PrintToFile("./OUTPUT/initUA.dat");
+	// printf ( "MyID = %d\tStep 10\n", MyID );
+	if ( MyID ==0 ) UA.PrintToFile("./OUTPUT/initUA.dat");
+	if ( MyID ==0 ) UA_Im.PrintToFile("./OUTPUT/initUA_Im.dat");
 	if ( MyID ==0 ) {
 		tVisuaRecord record;
 		record.WriteStructuredGrid("./OUTPUT/VISUA/init.vts");
 	}
+
+
+
+	ResetUA();
+	// printf ( "MyID = %d\tStep 8\n", MyID );
+	Symmetrize();
+	// printf ( "MyID = %d\tStep 9\n", MyID );
+
+	//UA.PrintToFile("./OUTPUT/initUA.dat");
+	// if ( MyID ==0 ) {
+	// 	tVisuaRecord record;
+	// 	record.WriteStructuredGrid("./OUTPUT/VISUA/init.vts");
+	// }
+
+
+
+
 // Terminate MPI.
 	MPI_Finalize();
 
