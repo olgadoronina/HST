@@ -1,0 +1,101 @@
+\documentclass[letterpaper,12pt,fleqn]{article}
+
+\usepackage{amssymb, amsmath, mathtools}
+\usepackage{caption, url, placeins, graphicx, mathabx, subfigure, multirow} \usepackage{float}  % для картинок 
+\mathtoolsset{showonlyrefs=true}                        % Показывать номера только у тех формул, на которые есть \eqref{} в тексте.
+\graphicspath{{pics/}}
+%%%ФОРМАТИРОВАНИЕ СТРАНИЦЫ
+\usepackage{geometry}                   % Меняем поля страницы
+\geometry{left=15mm}                    % левое поле
+\geometry{right=15mm}                   % правое поле
+\geometry{top=15mm}                     % верхнее поле
+\geometry{bottom=15mm}                  % нижнее поле
+\usepackage{setspace}                   % Позволяет менять межстрочные интервалы в тексте
+\onehalfspacing                         % полуторный интервал для всего текста
+
+\newcommand*\mean[1]{\overline{#1}}
+\newcommand*\I[1]{\text{Im}(#1)}
+% Title Page
+\title{HST code\\Documentation}
+\author{Olga Doronina}
+
+\begin{document}
+	\maketitle
+  
+
+\section{Initialization}
+\subsection{Wave numbers}
+Setup horizontal, vertical and spanwise wave numbers as
+\begin{equation}
+	 k_x(x) = x,\qquad 
+	 k_y(y)=y-\frac{y+1}{N_y(\frac{N_y}{2}+2)},\qquad
+	 k_z(z)=z-\frac{z+1}{N_z(\frac{N_z}{2}+2)}.
+\end{equation}
+\subsection{Mask}
+\begin{equation}
+	k^2(x,y,z) = \left(\frac{k_x(x)}{N_x}\right)^2+\left(\frac{k_y(y)}{N_y}\right)^2+\left(\frac{k_z(z)}{N_z}\right)^2
+\end{equation}
+\begin{equation}
+\text{If } k^2>\frac{2}{9}\ \text{then } mask = 1. 
+\end{equation}
+For all $y=N_y/2$ and for all $z=N_z/2$: $mask = 0$.
+\subsection{Energy}
+\begin{equation}
+k_0 = 1
+\end{equation}
+If the case is $128\times256\times512$ cube than
+\begin{equation}
+k_p = 6.68\qquad \gamma = 7.5\cdot 10^{-5}.
+\end{equation}
+If the case is $64\times64\times64$ cube than
+\begin{equation}
+k_p = 8.08\qquad \gamma = 7.888\cdot 10^{-4}.
+\end{equation}
+It seems that other cases we can't calculate.
+
+For wavenumber $k_0\le k \le k_p$:
+\begin{equation}
+e(k) = \gamma k^2
+\end{equation}
+For wavenumber $k_p< k\le k_{max}$:
+\begin{equation}
+e(k) =	(\gamma k_p)^{11/3}k^{-5/3}
+\end{equation}
+\subsection{Initial velocity field}
+\begin{equation}
+k_{max} = \frac{\sqrt{2}}{3}N_x;
+\end{equation}
+\begin{equation}
+k(x,y,z) =\sqrt{ \left(\frac{k_x(x)}{N_x}\right)^2 + \left(\frac{k_y(y)}{N_y}\right)^2 + \left(\frac{k_z(z)}{N_z}\right)^2}
+\end{equation}
+\begin{equation}
+e_f(x,y,z) = mask*\frac{\sqrt{e(k)}}{\sqrt{2\pi}k}
+\end{equation}
+Using that $\I{e^{i \theta}} = i\sin \theta$ we get
+\begin{align}
+	&\alpha =  e_fe^{i\theta_1}\cos\phi = e_f(\cos\theta_1 + i \sin\theta_1)\cos\phi,\\	
+	&\beta  = e_fe^{i\theta_2}\sin\phi = e_f(\cos\theta_2 + i \sin\theta_2)\sin\phi,\\
+	&\delta = e_fe^{i\theta_3} = e_f(\cos\theta_3 + i \sin\theta_3),
+\end{align}
+where $\theta_1,\ \theta_2,\ \theta_3$ and $\phi$ are random angles.
+
+If $k_x(x)^2+k_y(y)^2=0$ then velocity field 
+\begin{equation}
+	U_x(x,y,z) = \alpha,\qquad    
+	U_y(x,y,z) = \beta,\qquad
+	U_z(x,y,z) = 0;  
+\end{equation}
+else 
+\begin{equation}
+U_x(x,y,z) = \frac{\alpha kk_y(y) + \beta k_z(z)k_x(x)}{k\sqrt{k_x(x)^2 + k_y(y)^2}},
+\end{equation}
+\begin{equation}
+U_y(x,y,z) = \frac{\alpha kk_x(x)+\beta k_z(z)k_y(y)}{k\sqrt{k_x(x)^2 + k_y(y)^2}},
+\end{equation}
+\begin{equation}
+U_z(x,y,z) = -\frac{\beta\sqrt{k_x(x)^2+k_y(y)^2}}{k}.  
+\end{equation}
+If $e_f\le 0$ (here included $mask =0$) than all components of velocity field equal zero $U_i(x,y,z)=0$.
+For point $(0,0,0)$ all components of velocity field equal zero $U_i(x,y,z)=0$. 
+
+\end{document}
