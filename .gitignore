@@ -1,3 +1,5 @@
+# Files to be ignored by git #
+
 *.[oa]
 *~
 bin/
@@ -6,9 +8,14 @@ lib/
 lib/*
 obj/
 obj/*
-./idea/*
 
-# Files to be ignored by git #
+## From Clion
+###################
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+
 # Compiled Source #
 ###################
 *.com
